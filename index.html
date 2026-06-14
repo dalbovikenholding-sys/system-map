@@ -3,720 +3,339 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dalboviken — System Map</title>
+<title>Dalboviken — Koncernflöde</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0d0d0d;
-    color: #e0e0e0;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    padding: 24px;
-    min-width: 1400px;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0a0a;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow-x: auto;
+}
 
-  /* ── Header ── */
-  .header {
-    border: 1px solid #2a6b3c;
-    border-radius: 4px;
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(26,107,60,0.08);
-  }
-  .header h1 { font-size: 15px; font-weight: bold; color: #4ade80; letter-spacing: 0.1em; text-transform: uppercase; }
-  .header .meta { color: #555; font-size: 10px; }
+h1 {
+  text-align: center;
+  padding: 28px 0 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+h1 span { color: #4ade80; }
 
-  /* ── Section labels ── */
-  .section-label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.22em;
-    color: #444;
-    margin-bottom: 8px;
-    padding-left: 2px;
-  }
+#canvas {
+  position: relative;
+  width: 1860px;
+  margin: 0 auto;
+  padding: 20px 0 60px;
+}
 
-  /* ── Main grid ── */
-  .main-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-  }
+svg#lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
 
-  /* ── Company card ── */
-  .company {
-    border: 1px solid #222;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .company-header {
-    padding: 7px 10px;
-    font-size: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 1px solid #222;
-  }
-  .company-body { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+/* ── Node base ── */
+.node {
+  position: absolute;
+  z-index: 1;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.node small {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 400;
+  opacity: 0.6;
+  margin-top: 2px;
+}
 
-  /* ── Block types ── */
-  .block {
-    border-radius: 3px;
-    padding: 5px 8px;
-    font-size: 10px;
-    line-height: 1.5;
-  }
-  .block-title {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.55;
-    margin-bottom: 2px;
-  }
-  .block-value { color: #e0e0e0; }
-  .block-sub { font-size: 9px; opacity: 0.5; margin-top: 1px; }
+/* ── Node types ── */
+.n-holding {
+  background: #052e16;
+  border-color: #4ade80;
+  color: #bbf7d0;
+  border-radius: 14px;
+  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 0 0 4px rgba(74,222,128,0.12), 0 8px 32px rgba(74,222,128,0.18);
+}
+.n-company {
+  background: #111827;
+  border-color: #374151;
+  color: #f1f5f9;
+  font-size: 12px;
+  font-weight: 600;
+}
+.n-app {
+  background: #0f172a;
+  border-color: #1e40af;
+  color: #93c5fd;
+}
+.n-bot {
+  background: #1c1000;
+  border-color: #92400e;
+  color: #fcd34d;
+}
+.n-db {
+  background: #052e16;
+  border-color: #166534;
+  color: #86efac;
+}
+.n-pay {
+  background: #1e0a3c;
+  border-color: #7c3aed;
+  color: #c4b5fd;
+}
+.n-social {
+  background: #1a0a00;
+  border-color: #92400e;
+  color: #fb923c;
+}
+.n-ext {
+  background: #111;
+  border-color: #334155;
+  color: #94a3b8;
+  border-style: dashed;
+}
+.n-ai {
+  background: #0c1a2e;
+  border-color: #0ea5e9;
+  color: #7dd3fc;
+}
 
-  /* Colors */
-  .c-holding  { border-color: #2a6b3c; }
-  .h-holding  { background: #0f2e1a; color: #4ade80; }
-
-  .c-drift    { border-color: #1e3a5f; }
-  .h-drift    { background: #0a1e35; color: #60a5fa; }
-
-  .c-fastighet { border-color: #3d2a00; }
-  .h-fastighet { background: #1f1500; color: #fbbf24; }
-
-  .c-media    { border-color: #3a1e5f; }
-  .h-media    { background: #1e0f35; color: #c084fc; }
-
-  .c-ungkraft { border-color: #5f1e1e; }
-  .h-ungkraft { background: #350a0a; color: #f87171; }
-
-  .c-husvagn  { border-color: #2a4a3d; }
-  .h-husvagn  { background: #0e2218; color: #34d399; }
-
-  .c-grannfix { border-color: #1a5c2e; }
-  .h-grannfix { background: #0a2e16; color: #4ade80; }
-
-  .c-service  { border-color: #3d2a00; }
-  .h-service  { background: #1f1500; color: #fb923c; }
-
-  .c-tomrum   { border-color: #3d3d3d; }
-  .h-tomrum   { background: #1a1a1a; color: #9ca3af; }
-
-  /* Block bg colors */
-  .b-web      { background: rgba(96,165,250,0.07); border: 1px solid rgba(96,165,250,0.18); }
-  .b-bot      { background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.18); }
-  .b-db       { background: rgba(52,211,153,0.07); border: 1px solid rgba(52,211,153,0.18); }
-  .b-ai       { background: rgba(192,132,252,0.07); border: 1px solid rgba(192,132,252,0.18); }
-  .b-social   { background: rgba(249,115,22,0.07); border: 1px solid rgba(249,115,22,0.18); }
-  .b-payment  { background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.18); }
-  .b-infra    { background: rgba(100,116,139,0.07); border: 1px solid rgba(100,116,139,0.18); }
-  .b-port     { background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.12); }
-
-  /* Tags */
-  .tag {
-    display: inline-block;
-    font-size: 8px;
-    padding: 1px 5px;
-    border-radius: 2px;
-    margin: 1px 1px 0 0;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .tag-web     { background: rgba(96,165,250,0.2);  color: #93c5fd; }
-  .tag-bot     { background: rgba(251,191,36,0.2);  color: #fde68a; }
-  .tag-ai      { background: rgba(192,132,252,0.2); color: #d8b4fe; }
-  .tag-db      { background: rgba(52,211,153,0.2);  color: #6ee7b7; }
-  .tag-social  { background: rgba(249,115,22,0.2);  color: #fdba74; }
-  .tag-pay     { background: rgba(99,102,241,0.2);  color: #a5b4fc; }
-  .tag-infra   { background: rgba(100,116,139,0.2); color: #94a3b8; }
-  .tag-port    { background: rgba(34,197,94,0.2);   color: #86efac; }
-  .tag-off     { background: rgba(239,68,68,0.2);   color: #fca5a5; }
-
-  /* ── Tool row (internal tools) ── */
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  /* ── External services ── */
-  .ext-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .ext-card {
-    border: 1px solid #1e1e1e;
-    border-radius: 4px;
-    padding: 8px 10px;
-    background: #111;
-  }
-  .ext-card-title { font-size: 10px; font-weight: bold; margin-bottom: 5px; }
-  .ext-usage { font-size: 9px; color: #555; line-height: 1.6; }
-  .ext-usage span { color: #888; }
-
-  /* ── Legend ── */
-  .legend {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    padding: 10px 14px;
-    border: 1px solid #1e1e1e;
-    border-radius: 4px;
-    background: #0a0a0a;
-  }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 9px; color: #666; }
-  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
-
-  /* ── Connector lines (SVG) ── */
-  .arrow { color: #333; font-size: 9px; text-align: center; margin: 2px 0; }
-
-  /* ── Status dots ── */
-  .status { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
-  .status-live    { background: #22c55e; }
-  .status-soon    { background: #eab308; }
-  .status-dev     { background: #3b82f6; }
-  .status-off     { background: #6b7280; }
-
-  /* Port badge */
-  .port { font-size: 8px; color: #22c55e; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); padding: 1px 5px; border-radius: 2px; font-family: monospace; }
-
-  .divider { height: 1px; background: #1a1a1a; margin: 2px 0; }
-
-  .flow-arrow { text-align: center; font-size: 16px; color: #2a6b3c; margin: -4px 0; }
+/* ── Section labels ── */
+.row-label {
+  position: absolute;
+  z-index: 0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #334155;
+  left: 0;
+}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     HEADER
-══════════════════════════════════════════ -->
-<div class="header">
-  <div>
-    <h1>◆ Dalboviken Holding AB — System Map</h1>
-    <div class="meta">Org. 559582-8152 · Erik Hedlund · Luleå · Uppdaterad 2026-06-14</div>
-  </div>
-  <div style="text-align:right">
-    <div class="meta">GitHub: dalbovikenholding-sys</div>
-    <div class="meta">Workspace: C:\Users\dalbo\DALBOVIKEN\</div>
-  </div>
-</div>
+<h1><span>Dalboviken</span> &nbsp;Koncernflöde</h1>
 
-<!-- ══════════════════════════════════════════
-     LEGEND
-══════════════════════════════════════════ -->
-<div class="legend">
-  <span class="legend-item"><span class="legend-dot" style="background:#60a5fa"></span>Hemsida / App</span>
-  <span class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span>Bot / Automation</span>
-  <span class="legend-item"><span class="legend-dot" style="background:#34d399"></span>Databas</span>
-  <span class="legend-item"><span class="legend-dot" style="background:#c084fc"></span>AI / Claude API</span>
-  <span class="legend-item"><span class="legend-dot" style="background:#f97316"></span>Social media</span>
-  <span class="legend-item"><span class="legend-dot" style="background:#818cf8"></span>Betalning</span>
-  <span class="legend-item"><span class="legend-dot" style="background:#64748b"></span>Infrastruktur</span>
-  <span class="legend-item"><span class="status status-live"></span>Live</span>
-  <span class="legend-item"><span class="status status-soon"></span>Lanseras snart</span>
-  <span class="legend-item"><span class="status status-dev"></span>Under dev</span>
-  <span class="legend-item"><span class="status status-off"></span>Inaktiv / Planerad</span>
-</div>
+<div id="canvas">
+  <svg id="lines"></svg>
 
-<!-- ══════════════════════════════════════════
-     BOLAG
-══════════════════════════════════════════ -->
-<div class="section-label">▸ Bolag &amp; Projekt</div>
-<div class="main-grid">
-
-  <!-- DRIFT AB -->
-  <div class="company c-drift">
-    <div class="company-header h-drift"><span class="status status-live"></span>Dalboviken Drift AB</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-title">App</div>
-        <div class="block-value">DRIFT-appen</div>
-        <div class="block-sub">Next.js 16 · Prisma/SQLite</div>
-        <div class="block-sub"><span class="port">:3002</span></div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">Telefonväxel</div>
-        <div class="block-value">VAXEL</div>
-        <div class="block-sub">Express · Claude API</div>
-        <div class="block-sub"><span class="port">:3100</span></div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">E-postagent</div>
-        <div class="block-value">MAILBOT</div>
-        <div class="block-sub">PowerShell · MailKit</div>
-        <div class="block-sub"><span class="port">:8765</span></div>
-      </div>
-      <div class="block b-web">
-        <div class="block-title">Dashboard</div>
-        <div class="block-value">DRIFTCENTRAL</div>
-        <div class="block-sub">Vite + React 19 · Proxy-hub</div>
-        <div class="block-sub"><span class="port">:5173</span></div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">Aktieanalys</div>
-        <div class="block-value">OMX-BOT</div>
-        <div class="block-sub">Python · Streamlit</div>
-        <div class="block-sub"><span class="port">:8501</span> <span class="tag tag-bot">17:45 dagligen</span></div>
-      </div>
-      <div class="block b-infra">
-        <div class="block-title">Nyhetsverktyg</div>
-        <div class="block-value">RSS + AI-inlägg</div>
-        <div class="block-sub">Anthropic SDK</div>
-      </div>
-    </div>
+  <!-- ── Rad 0: Holding ── -->
+  <div class="node n-holding" id="holding" style="top:24px;left:860px;">
+    Dalboviken Holding AB
+    <small>559582-8152 · Moderbolag</small>
   </div>
 
-  <!-- FASTIGHETER AB -->
-  <div class="company c-fastighet">
-    <div class="company-header h-fastighet"><span class="status status-live"></span>Dalboviken Fastigheter AB</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-title">Hemsida</div>
-        <div class="block-value">dalboviken.se</div>
-        <div class="block-sub">Statisk HTML (manuellt ägd)</div>
-        <div class="block-sub">Loopia-hosting</div>
-      </div>
-      <div class="block b-infra">
-        <div class="block-title">Logotyp</div>
-        <div class="block-value">Kristallform (Alt. 2)</div>
-        <div class="block-sub">Guld-accent · SVG</div>
-      </div>
-      <div class="block b-web" style="opacity:0.5">
-        <div class="block-title">Migration planerad</div>
-        <div class="block-value">dalboviken-export/</div>
-        <div class="block-sub">Loopia → ny stack</div>
-      </div>
-    </div>
-  </div>
+  <!-- ── Rad 1: Dotterbolag ── -->
+  <div class="node n-company" id="c-drift"        style="top:150px;left:20px;">Dalboviken Drift AB<small>Nyheter &amp; sociala medier</small></div>
+  <div class="node n-company" id="c-fast"         style="top:150px;left:230px;">Dalboviken Fastigheter AB<small>Fastighetsförvaltning</small></div>
+  <div class="node n-company" id="c-media"        style="top:150px;left:470px;">Dalboviken Media AB<small>Helautomatiserad webbyrå</small></div>
+  <div class="node n-company" id="c-ungkraft"     style="top:150px;left:710px;">UngKraft Norrbotten AB<small>Ungdomstjänster</small></div>
+  <div class="node n-company" id="c-hyrhusvagnen" style="top:150px;left:960px;">Hyrhusvagnen<small>Husvagnsuthyrning</small></div>
+  <div class="node n-company" id="c-grannfix"     style="top:150px;left:1180px;">Grannfix<small>Granntjänstmarknadsplats</small></div>
+  <div class="node n-company" id="c-service"      style="top:150px;left:1420px;">Dalboviken Service<small>Hantverkartjänster</small></div>
+  <div class="node n-company" id="c-tomrum"       style="top:150px;left:1640px;">Dalboviken Tomrum<small>Dödsbo &amp; husröjning</small></div>
 
-  <!-- MEDIA -->
-  <div class="company c-media">
-    <div class="company-header h-media"><span class="status status-live"></span>Dalboviken Media</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-title">Företagswebb</div>
-        <div class="block-value">dalboviken-web</div>
-        <div class="block-sub">Vite + React</div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">Hemsidebyrå Pipeline</div>
-        <div class="block-value">Python · Supabase</div>
-        <div class="block-sub">prospecting → outreach → content → delivery → reports</div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">Uppföljningsmejl</div>
-        <div class="block-value">Task Scheduler</div>
-        <div class="block-sub">Dag 3 kl 09:00 · Dag 7 kl 09:05</div>
-        <div class="block-sub">Claude API · Resend</div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">Månadsrapport</div>
-        <div class="block-value">1:a varje månad 08:00</div>
-        <div class="block-sub">run_monthly_report.bat</div>
-      </div>
-      <div class="block b-ai">
-        <div class="block-title">Bildpipeline</div>
-        <div class="block-value">Flux Generator</div>
-        <div class="block-sub">Replicate API · Python</div>
-      </div>
-      <div class="block b-db">
-        <div class="block-title">Databas</div>
-        <div class="block-value">Supabase</div>
-        <div class="block-sub">prospects · customers · outreach_log · automation_log</div>
-      </div>
-    </div>
-  </div>
+  <!-- ── Rad 2: Appar / webbsidor ── -->
+  <div class="node n-app" id="a-drift-web"      style="top:280px;left:20px;">Drift AB Webb<small>Next.js 16 · port 3002</small></div>
+  <div class="node n-app" id="a-fast-web"       style="top:280px;left:220px;">fastigheter.dalboviken.se<small>Statisk HTML · Loopia</small></div>
+  <div class="node n-app" id="a-media-web"      style="top:280px;left:440px;">Media Webb<small>Vite + React · Vercel</small></div>
+  <div class="node n-app" id="a-ungkraft-web"   style="top:280px;left:680px;">UngKraft App<small>Lovable · TanStack Start</small></div>
+  <div class="node n-app" id="a-hyrhusvagnen-web" style="top:280px;left:920px;">hyrhusvagnen.se<small>Next.js 16 · Vercel</small></div>
+  <div class="node n-app" id="a-grannfix-web"   style="top:280px;left:1160px;">grannfix.se<small>Next.js 16 · Vercel</small></div>
+  <div class="node n-app" id="a-service-web"    style="top:280px;left:1400px;">service.dalboviken.se<small>TanStack · Cloudflare</small></div>
+  <div class="node n-app" id="a-tomrum-web"     style="top:280px;left:1630px;">tomrum.dalboviken.se<small>Statisk Vite · Vercel</small></div>
 
-  <!-- UNGKRAFT -->
-  <div class="company c-ungkraft">
-    <div class="company-header h-ungkraft"><span class="status status-dev"></span>UngKraft Norrbotten AB</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-title">App (frontend)</div>
-        <div class="block-value">Lovable.dev</div>
-        <div class="block-sub">Rör ej — externt byggd</div>
-      </div>
-      <div class="block b-web">
-        <div class="block-title">Kampanjsida</div>
-        <div class="block-value">ungkraft-campaign</div>
-        <div class="block-sub">Vite <span class="port">:5174</span></div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">Backend</div>
-        <div class="block-value">Supabase Edge Functions</div>
-        <div class="block-sub">Deno / TypeScript</div>
-        <div class="block-sub">TanStack Start · bun dev</div>
-      </div>
-      <div class="block b-payment">
-        <div class="block-title">Betalflöde</div>
-        <div class="block-value">Swish → Supabase</div>
-        <div class="block-sub">→ Gigapay (lön ex. moms)</div>
-        <div class="block-sub">→ Fortnox (bokföring)</div>
-      </div>
-      <div class="block b-db">
-        <div class="block-title">Databas</div>
-        <div class="block-value">Supabase</div>
-        <div class="block-sub">Tjänster momspliktiga 25%</div>
-      </div>
-    </div>
-  </div>
+  <!-- ── Rad 3: Bots / verktyg ── -->
+  <div class="node n-bot" id="b-drift-ai"       style="top:390px;left:20px;">AI-inläggsgenerator<small>Anthropic SDK + Prisma/SQLite</small></div>
+  <div class="node n-bot" id="b-omxbot"         style="top:390px;left:220px;">OMX-bot<small>Python · Streamlit · port 8501</small></div>
+  <div class="node n-bot" id="b-media-pipeline" style="top:390px;left:440px;">Mediapipeline<small>Python: prospect→utskick→bygg→deliver</small></div>
+  <div class="node n-bot" id="b-flux"           style="top:390px;left:660px;">Flux-bildgenerator<small>Python · Replicate API</small></div>
+  <div class="node n-bot" id="b-ungkraft-edge"  style="top:390px;left:880px;">Edge Functions<small>Deno · Supabase · Swish</small></div>
+  <div class="node n-bot" id="b-mailbot-hyrhus" style="top:390px;left:1100px;">Mailbot Hyrhusvagnen<small>PowerShell + MailKit</small></div>
+  <div class="node n-bot" id="b-mailbot-main"   style="top:390px;left:1320px;">Mailbot Dalboviken<small>PowerShell + MailKit · port 8765</small></div>
+  <div class="node n-bot" id="b-vaxel"          style="top:390px;left:1560px;">AI-telefonväxel<small>Express · port 3100</small></div>
+  <div class="node n-bot" id="b-driftcentral"   style="top:390px;left:1720px;">DriftCentral<small>Vite + React · port 5173</small></div>
 
-  <!-- HYRHUSVAGNEN -->
-  <div class="company c-husvagn">
-    <div class="company-header h-husvagn"><span class="status status-live"></span>Hyrhusvagnen.se</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-title">Hemsida</div>
-        <div class="block-value">hyrhusvagnen.se</div>
-        <div class="block-sub">Next.js 16 · Prisma · Tailwind</div>
-        <div class="block-sub">Vercel · <span class="port">:3003 dev</span></div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">Reel-worker</div>
-        <div class="block-value">FaktaReel Pipeline</div>
-        <div class="block-sub">AI-script + röst + video</div>
-        <div class="block-sub"><span class="tag tag-bot">Processklås: .reel-worker.lock</span></div>
-      </div>
-      <div class="block b-social">
-        <div class="block-title">Instagram</div>
-        <div class="block-value">Bilder kl 07:05</div>
-        <div class="block-sub">Reels: manuellt godkänd</div>
-        <div class="block-sub">/admin/instagram · /admin/reels</div>
-      </div>
-      <div class="block b-social">
-        <div class="block-title">Facebook</div>
-        <div class="block-value">Page ID: 1180320185159589</div>
-        <div class="block-sub">App ID: 1518567379666904</div>
-        <div class="block-sub"><span class="tag tag-social">Token i DB + Vercel env</span></div>
-      </div>
-      <div class="block b-bot">
-        <div class="block-title">Mailbot</div>
-        <div class="block-value">info@hyrhusvagnen.se</div>
-        <div class="block-sub">PowerShell + Claude API</div>
-      </div>
-      <div class="block b-db">
-        <div class="block-title">Databas</div>
-        <div class="block-value">Supabase PostgreSQL</div>
-        <div class="block-sub">Booking · BlockedDate · FaktaReel · InstagramPost · AppSetting</div>
-      </div>
-      <div class="block b-payment">
-        <div class="block-title">Betalning</div>
-        <div class="block-value">Swish</div>
-        <div class="block-sub">Husdjur ej tillåtna i vagnen</div>
-      </div>
-    </div>
-  </div>
+  <!-- ── Rad 4: Sociala / Instagram ── -->
+  <div class="node n-social" id="s-ig-drift"    style="top:510px;left:20px;">@dalboviken_drift<small>Reels · Stories</small></div>
+  <div class="node n-social" id="s-ig-fast"     style="top:510px;left:220px;">@dalboviken_fastigheter<small>Reels</small></div>
+  <div class="node n-social" id="s-ig-media"    style="top:510px;left:440px;">@dalboviken_media<small>Reels · Outreach</small></div>
+  <div class="node n-social" id="s-ig-ungkraft" style="top:510px;left:660px;">@ungkraft_norrbotten<small>Reels · Stories</small></div>
+  <div class="node n-social" id="s-reel-worker" style="top:510px;left:880px;">Reel-worker<small>Python pipeline · processlås</small></div>
 
-  <!-- GRANNFIX -->
-  <div class="company c-grannfix">
-    <div class="company-header h-grannfix"><span class="status status-soon"></span>Grannfix</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-title">Hemsida</div>
-        <div class="block-value">grannfix.se</div>
-        <div class="block-sub">Next.js 16.2.9 · App Router</div>
-        <div class="block-sub">Tailwind v4 · Geist Sans</div>
-        <div class="block-sub">Vercel: prj_93VRlPCG…</div>
-      </div>
-      <div class="block b-db">
-        <div class="block-title">Databas</div>
-        <div class="block-value">Supabase</div>
-        <div class="block-sub">pibgnbzgluwdskkaipui</div>
-        <div class="block-sub">profiles · uppdrag · intresse · betyg</div>
-      </div>
-      <div class="block b-payment">
-        <div class="block-title">Betalning</div>
-        <div class="block-value">Stripe Checkout</div>
-        <div class="block-sub">15% serviceavgift (min 25 kr)</div>
-        <div class="block-sub"><span class="tag tag-off">Stripe-konto saknas ännu</span></div>
-      </div>
-      <div class="block b-infra">
-        <div class="block-title">GitHub</div>
-        <div class="block-value">dalbovikenholding-sys/grannfix</div>
-        <div class="block-sub">master = prod · dev = preview</div>
-      </div>
-      <div class="block b-infra" style="opacity:0.6">
-        <div class="block-title">Kvar till lansering</div>
-        <div class="block-value">Stripe-nycklar</div>
-        <div class="block-sub">Domänkoppling till Vercel</div>
-        <div class="block-sub">Supabase e-postmallar</div>
-      </div>
-    </div>
-  </div>
+  <!-- ── Rad 5: Databaser ── -->
+  <div class="node n-db" id="d-prisma"          style="top:630px;left:20px;">SQLite / Prisma<small>Drift AB · dev.db</small></div>
+  <div class="node n-db" id="d-supa-grannfix"   style="top:630px;left:220px;">Supabase Grannfix<small>pibgnbzgluwdskkaipui</small></div>
+  <div class="node n-db" id="d-supa-media"      style="top:630px;left:460px;">Supabase Media<small>prospects · customers · logs</small></div>
+  <div class="node n-db" id="d-supa-ungkraft"   style="top:630px;left:700px;">Supabase UngKraft<small>Swish → lön → bokföring</small></div>
+  <div class="node n-db" id="d-supa-hyrhus"     style="top:630px;left:940px;">Supabase Hyrhusvagnen<small>Bokningar · sociala tokens</small></div>
 
-  <!-- SERVICE -->
-  <div class="company c-service">
-    <div class="company-header h-service"><span class="status status-dev"></span>Dalboviken Service AB</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-title">Hemsida</div>
-        <div class="block-value">service.dalboviken.se</div>
-        <div class="block-sub">TanStack Start (React)</div>
-        <div class="block-sub">Cloudflare Workers</div>
-      </div>
-      <div class="block b-infra">
-        <div class="block-title">Deploy</div>
-        <div class="block-value">wrangler deploy</div>
-        <div class="block-sub">account_id: b91feb8b…</div>
-      </div>
-      <div class="block b-web">
-        <div class="block-title">Innehåll</div>
-        <div class="block-value">Bygg · Hemfix · Trädgård · Flytt</div>
-        <div class="block-sub">ROT-avdrag · F-skattsedel</div>
-        <div class="block-sub">Offert inom 2h</div>
-      </div>
-    </div>
-  </div>
+  <!-- ── Rad 6: Externa tjänster ── -->
+  <div class="node n-ai"  id="e-claude"         style="top:760px;left:20px;">Claude API<small>Anthropic · alla bots + växel</small></div>
+  <div class="node n-ext" id="e-vercel"         style="top:760px;left:220px;">Vercel<small>Grannfix · Media · Hyrhusvagnen · Tomrum</small></div>
+  <div class="node n-ext" id="e-github"         style="top:760px;left:440px;">GitHub<small>dalbovikenholding-sys · repos</small></div>
+  <div class="node n-ext" id="e-resend"         style="top:760px;left:640px;">Resend / SMTP<small>Transaktionell e-post</small></div>
+  <div class="node n-ext" id="e-replicate"      style="top:760px;left:840px;">Replicate<small>Flux bildgenerering</small></div>
+  <div class="node n-pay" id="e-pay"            style="top:760px;left:1040px;">Swish · Gigapay · Fortnox<small>Betalning · lön · bokföring</small></div>
+  <div class="node n-ext" id="e-loopia"         style="top:760px;left:1280px;">Loopia · Cloudflare<small>DNS · domäner · hosting</small></div>
+  <div class="node n-ext" id="e-n8n"            style="top:760px;left:1480px;">n8n<small>Automatisering · webhooks</small></div>
+  <div class="node n-ext" id="e-task-sched"     style="top:760px;left:1660px;">Task Scheduler<small>Windows · OMX-bot 17:45</small></div>
 
-  <!-- TOMRUM -->
-  <div class="company c-tomrum">
-    <div class="company-header h-tomrum"><span class="status status-dev"></span>Dalboviken Tomrum</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-title">Hemsida</div>
-        <div class="block-value">tomrum.dalboviken.se</div>
-        <div class="block-sub">Vite + React (statisk)</div>
-      </div>
-      <div class="block b-infra">
-        <div class="block-title">Tjänster</div>
-        <div class="block-value">Dödsbo · Husröjning</div>
-        <div class="block-sub">Garage · Källare · Förråd</div>
-        <div class="block-sub">Norrbotten · RUT-avdrag</div>
-      </div>
-      <div class="block b-infra">
-        <div class="block-title">RUT-regler</div>
-        <div class="block-value">Flytt till/från magasin ✓</div>
-        <div class="block-sub">Magasinhyra ✗</div>
-        <div class="block-sub">50% på arbete inkl. moms</div>
-      </div>
-    </div>
-  </div>
+</div><!-- /canvas -->
 
-</div>
+<script>
+const svg = document.getElementById('lines');
+const canvas = document.getElementById('canvas');
 
-<!-- ══════════════════════════════════════════
-     INTERNA VERKTYG
-══════════════════════════════════════════ -->
-<div class="section-label">▸ Interna Verktyg &amp; Automation</div>
-<div class="tools-grid">
+function getCenter(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const cr = canvas.getBoundingClientRect();
+  const er = el.getBoundingClientRect();
+  return {
+    x: er.left - cr.left + er.width / 2,
+    y: er.top  - cr.top  + er.height / 2,
+    top:    er.top  - cr.top,
+    bottom: er.top  - cr.top + er.height,
+    left:   er.left - cr.left,
+    right:  er.left - cr.left + er.width,
+  };
+}
 
-  <div class="company c-drift">
-    <div class="company-header h-drift" style="font-size:9px">AI TELEFONVÄXEL — VAXEL</div>
-    <div class="company-body">
-      <div class="block b-bot">
-        <div class="block-value">Express + Anthropic SDK</div>
-        <div class="block-sub"><span class="port">:3100</span> · regler.txt = källa</div>
-        <div class="block-sub">Alltid svenska · Max 2 meningar/svar</div>
-        <div class="block-sub">Måste alltid anropa call_action</div>
-        <div class="block-sub">6 scenarioflöden definierade</div>
-      </div>
-    </div>
-  </div>
+function line(fromId, toId, { color = '#4ade80', width = 1.5, dash = '', opacity = 0.55 } = {}) {
+  const a = getCenter(fromId);
+  const b = getCenter(toId);
+  if (!a || !b) return;
 
-  <div class="company c-drift">
-    <div class="company-header h-drift" style="font-size:9px">E-POSTAGENT — MAILBOT</div>
-    <div class="company-body">
-      <div class="block b-bot">
-        <div class="block-value">PowerShell + MailKit/MimeKit</div>
-        <div class="block-sub"><span class="port">:8765</span> · Python dashboard</div>
-        <div class="block-sub">email_agent.ps1 · dashboard.py</div>
-        <div class="block-sub">Claude API för svar</div>
-      </div>
-    </div>
-  </div>
+  const x1 = a.x, y1 = a.bottom;
+  const x2 = b.x, y2 = b.top;
+  const my = (y1 + y2) / 2;
 
-  <div class="company" style="border-color:#1e3a5f">
-    <div class="company-header" style="background:#0a1e35;color:#60a5fa;font-size:9px">INTERN DASHBOARD — DRIFTCENTRAL</div>
-    <div class="company-body">
-      <div class="block b-web">
-        <div class="block-value">Vite + React 19</div>
-        <div class="block-sub"><span class="port">:5173</span></div>
-        <div class="block-sub">Proxy: /vaxel → :3100</div>
-        <div class="block-sub">Proxy: /emailagent → :8765</div>
-      </div>
-    </div>
-  </div>
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`);
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', color);
+  path.setAttribute('stroke-width', width);
+  path.setAttribute('stroke-opacity', opacity);
+  if (dash) path.setAttribute('stroke-dasharray', dash);
+  svg.appendChild(path);
+}
 
-  <div class="company" style="border-color:#2d1b4e">
-    <div class="company-header" style="background:#160d2a;color:#a78bfa;font-size:9px">AKTIEANALYS — OMX-BOT</div>
-    <div class="company-body">
-      <div class="block b-bot">
-        <div class="block-value">Python · Streamlit</div>
-        <div class="block-sub"><span class="port">:8501</span></div>
-        <div class="block-sub">Task Scheduler kör 17:45</div>
-        <div class="block-sub">Daglig OMX30-analys</div>
-        <div class="block-sub">Telegram-alerts</div>
-        <div class="block-sub"><span class="tag tag-off">Konflikt med MEDIA på :8501</span></div>
-      </div>
-    </div>
-  </div>
+function drawAll() {
+  svg.innerHTML = '';
+  const GREEN  = '#4ade80';
+  const GRAY   = '#475569';
+  const BLUE   = '#60a5fa';
+  const YELLOW = '#fbbf24';
+  const ORANGE = '#fb923c';
+  const PURPLE = '#a78bfa';
+  const CYAN   = '#22d3ee';
 
-  <div class="company" style="border-color:#3a3a00">
-    <div class="company-header" style="background:#1a1900;color:#facc15;font-size:9px">WINDOWS TASK SCHEDULER</div>
-    <div class="company-body">
-      <div class="block b-bot">
-        <div class="block-value">Ersätter n8n</div>
-        <div class="block-sub">Followup_Dag3: Vardagar 09:00</div>
-        <div class="block-sub">Followup_Dag7: Vardagar 09:05</div>
-        <div class="block-sub">Manadsrapport: 1:a/mån 08:00</div>
-        <div class="block-sub">Python 3.14.3 · outreach/followup.py</div>
-      </div>
-    </div>
-  </div>
+  /* Holding → dotterbolag */
+  ['c-drift','c-fast','c-media','c-ungkraft','c-hyrhusvagnen','c-grannfix','c-service','c-tomrum']
+    .forEach(id => line('holding', id, { color: GREEN, width: 2, opacity: 0.7 }));
 
-</div>
+  /* Dotterbolag → webbsidor */
+  line('c-drift',        'a-drift-web',        { color: BLUE,   width: 1.2 });
+  line('c-fast',         'a-fast-web',          { color: BLUE,   width: 1.2 });
+  line('c-media',        'a-media-web',         { color: BLUE,   width: 1.2 });
+  line('c-ungkraft',     'a-ungkraft-web',      { color: BLUE,   width: 1.2 });
+  line('c-hyrhusvagnen', 'a-hyrhusvagnen-web',  { color: BLUE,   width: 1.2 });
+  line('c-grannfix',     'a-grannfix-web',      { color: BLUE,   width: 1.2 });
+  line('c-service',      'a-service-web',       { color: BLUE,   width: 1.2 });
+  line('c-tomrum',       'a-tomrum-web',        { color: BLUE,   width: 1.2 });
 
-<!-- ══════════════════════════════════════════
-     EXTERNA TJÄNSTER
-══════════════════════════════════════════ -->
-<div class="section-label">▸ Externa Tjänster &amp; Integrationer</div>
-<div class="ext-grid">
+  /* Dotterbolag / appar → bots */
+  line('a-drift-web',       'b-drift-ai',        { color: YELLOW, width: 1.2 });
+  line('c-fast',            'b-omxbot',           { color: YELLOW, width: 1, dash: '4 3' });
+  line('a-media-web',       'b-media-pipeline',  { color: YELLOW, width: 1.2 });
+  line('b-media-pipeline',  'b-flux',            { color: YELLOW, width: 1 });
+  line('a-ungkraft-web',    'b-ungkraft-edge',   { color: YELLOW, width: 1.2 });
+  line('a-hyrhusvagnen-web','b-mailbot-hyrhus',  { color: YELLOW, width: 1.2 });
+  line('c-drift',           'b-mailbot-main',    { color: YELLOW, width: 1, dash: '4 3' });
+  line('c-service',         'b-vaxel',           { color: YELLOW, width: 1.2 });
+  line('b-vaxel',           'b-driftcentral',    { color: GRAY,   width: 1, dash: '3 3' });
 
-  <div class="ext-card" style="border-color:#3a1e5f">
-    <div class="ext-card-title" style="color:#c084fc">◈ Anthropic Claude API</div>
-    <div class="ext-usage">
-      <span>VAXEL</span> — telefonagent<br>
-      <span>MAILBOT</span> — e-postsvar<br>
-      <span>HYRHUSVAGN</span> — captions<br>
-      <span>MEDIA</span> — uppföljningsmejl<br>
-      <span>DRIFT</span> — nyhetsbearbetning<br>
-      <span>GRANNFIX</span> — (planerat)<br>
-      Modell: claude-sonnet-4-6
-    </div>
-  </div>
+  /* Bots / appar → Instagram */
+  line('b-drift-ai',       's-ig-drift',     { color: ORANGE, width: 1 });
+  line('a-fast-web',       's-ig-fast',      { color: ORANGE, width: 1 });
+  line('b-media-pipeline', 's-ig-media',     { color: ORANGE, width: 1 });
+  line('a-ungkraft-web',   's-ig-ungkraft',  { color: ORANGE, width: 1 });
+  line('b-drift-ai',       's-reel-worker',  { color: ORANGE, width: 1, dash: '3 3' });
+  line('b-media-pipeline', 's-reel-worker',  { color: ORANGE, width: 1, dash: '3 3' });
 
-  <div class="ext-card" style="border-color:#1a4a3d">
-    <div class="ext-card-title" style="color:#34d399">◈ Supabase</div>
-    <div class="ext-usage">
-      <span>GRANNFIX</span> — pibgnbzgluwdskkaipui<br>
-      <span>HYRHUSVAGN</span> — PostgreSQL<br>
-      <span>MEDIA</span> — prospects/outreach<br>
-      <span>UNGKRAFT</span> — Edge Functions<br>
-      North EU (Stockholm)<br>
-      RLS aktiverat (grannfix)
-    </div>
-  </div>
+  /* Appar → databaser */
+  line('a-drift-web',       'd-prisma',         { color: GREEN, width: 1 });
+  line('a-grannfix-web',    'd-supa-grannfix',  { color: GREEN, width: 1.2 });
+  line('b-media-pipeline',  'd-supa-media',     { color: GREEN, width: 1 });
+  line('b-ungkraft-edge',   'd-supa-ungkraft',  { color: GREEN, width: 1.2 });
+  line('a-hyrhusvagnen-web','d-supa-hyrhus',    { color: GREEN, width: 1 });
 
-  <div class="ext-card" style="border-color:#1e3a5f">
-    <div class="ext-card-title" style="color:#60a5fa">◈ Vercel</div>
-    <div class="ext-usage">
-      <span>GRANNFIX</span> — prj_93VRlPCG…<br>
-      <span>HYRHUSVAGN</span> — auto-deploy<br>
-      Team: dalbovikenholding-7697<br>
-      Token: C:\Users\dalbo\.vercel<br>
-      master-branch = production<br>
-      dev-branch = preview
-    </div>
-  </div>
+  /* Bots → externa AI */
+  ['b-drift-ai','b-media-pipeline','b-mailbot-main','b-mailbot-hyrhus','b-vaxel','b-ungkraft-edge']
+    .forEach(id => line(id, 'e-claude', { color: CYAN, width: 1, dash: '5 3', opacity: 0.45 }));
 
-  <div class="ext-card" style="border-color:#1e1e1e">
-    <div class="ext-card-title" style="color:#e0e0e0">◈ GitHub</div>
-    <div class="ext-usage">
-      Org: dalbovikenholding-sys<br>
-      Commit-e-post: dalboviken.holding@gmail.com<br>
-      <span>grannfix</span> — public<br>
-      Alla sajter → GitHub → Vercel
-    </div>
-  </div>
+  /* Appar / bots → Vercel */
+  ['a-grannfix-web','a-media-web','a-hyrhusvagnen-web','a-tomrum-web']
+    .forEach(id => line(id, 'e-vercel', { color: GRAY, width: 1, dash: '4 3', opacity: 0.4 }));
 
-  <div class="ext-card" style="border-color:#1e2a5f">
-    <div class="ext-card-title" style="color:#818cf8">◈ Stripe</div>
-    <div class="ext-usage">
-      <span>GRANNFIX</span> — Checkout Sessions<br>
-      Express Connect (planerat)<br>
-      15% serviceavgift<br>
-      webhook: payment_intent.succeeded<br>
-      <span style="color:#ef4444">Status: Konto ej konfigurerat</span>
-    </div>
-  </div>
+  /* Allt → GitHub */
+  line('a-drift-web',  'e-github', { color: GRAY, width: 1, dash: '4 3', opacity: 0.35 });
+  line('a-grannfix-web','e-github', { color: GRAY, width: 1, dash: '4 3', opacity: 0.35 });
 
-  <div class="ext-card" style="border-color:#3a1500">
-    <div class="ext-card-title" style="color:#f97316">◈ Social Media</div>
-    <div class="ext-usage">
-      <span>Instagram</span> — Graph API<br>
-      Business Account (hyrhusvagnen)<br>
-      <span>Facebook</span> — Page 1180320185159589<br>
-      App 1518567379666904<br>
-      <span>TikTok</span> — OAuth-flow<br>
-      Reels: godkänn via /admin/reels
-    </div>
-  </div>
+  /* Ungkraft → betalflöde */
+  line('b-ungkraft-edge', 'e-pay', { color: PURPLE, width: 1.5 });
 
-  <div class="ext-card" style="border-color:#1e1e1e">
-    <div class="ext-card-title" style="color:#94a3b8">◈ Övriga</div>
-    <div class="ext-usage">
-      <span>Resend</span> — e-post (mailbot, media)<br>
-      <span>Replicate/Flux</span> — bildgenerering<br>
-      <span>Swish</span> — betalning (husvagn, ungkraft)<br>
-      <span>Gigapay</span> — löner (ungkraft)<br>
-      <span>Fortnox</span> — bokföring (ungkraft)<br>
-      <span>Loopia</span> — dalboviken.se hosting<br>
-      <span>Cloudflare</span> — Workers (service)<br>
-      <span>Home Assistant + ESPHome</span> — drift<br>
-      <span>Telegram</span> — OMX-bot alerts
-    </div>
-  </div>
+  /* Media pipeline → Replicate */
+  line('b-flux', 'e-replicate', { color: GRAY, width: 1, dash: '4 3', opacity: 0.5 });
 
-</div>
+  /* Mailbots → Resend */
+  line('b-mailbot-main',  'e-resend', { color: GRAY, width: 1, dash: '4 3', opacity: 0.5 });
+  line('b-mailbot-hyrhus','e-resend', { color: GRAY, width: 1, dash: '4 3', opacity: 0.5 });
 
-<!-- ══════════════════════════════════════════
-     PORT-ALLOKERING
-══════════════════════════════════════════ -->
-<div class="section-label">▸ Port-allokering (localhost)</div>
-<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-bottom:20px">
-  <div class="ext-card" style="text-align:center">
-    <div style="font-size:18px;color:#22c55e;font-weight:bold">:3002</div>
-    <div style="font-size:9px;color:#555;margin-top:3px">DRIFT (Next.js)</div>
-  </div>
-  <div class="ext-card" style="text-align:center">
-    <div style="font-size:18px;color:#60a5fa;font-weight:bold">:3003</div>
-    <div style="font-size:9px;color:#555;margin-top:3px">HYRHUSVAGN dev</div>
-  </div>
-  <div class="ext-card" style="text-align:center">
-    <div style="font-size:18px;color:#fbbf24;font-weight:bold">:3100</div>
-    <div style="font-size:9px;color:#555;margin-top:3px">VAXEL (Express)</div>
-  </div>
-  <div class="ext-card" style="text-align:center">
-    <div style="font-size:18px;color:#34d399;font-weight:bold">:5173</div>
-    <div style="font-size:9px;color:#555;margin-top:3px">DRIFTCENTRAL</div>
-  </div>
-  <div class="ext-card" style="text-align:center">
-    <div style="font-size:18px;color:#a78bfa;font-weight:bold">:5174</div>
-    <div style="font-size:9px;color:#555;margin-top:3px">UNGKRAFT campaign</div>
-  </div>
-  <div class="ext-card" style="text-align:center;border-color:#3a3a00">
-    <div style="font-size:18px;color:#facc15;font-weight:bold">:8501</div>
-    <div style="font-size:9px;color:#ef4444;margin-top:3px">MEDIA / OMX-BOT ⚠</div>
-    <div style="font-size:8px;color:#555">Ej samtida</div>
-  </div>
-  <div class="ext-card" style="text-align:center">
-    <div style="font-size:18px;color:#f97316;font-weight:bold">:8765</div>
-    <div style="font-size:9px;color:#555;margin-top:3px">MAILBOT (Python)</div>
-  </div>
-  <div class="ext-card" style="text-align:center;opacity:0.4">
-    <div style="font-size:18px;color:#64748b;font-weight:bold">—</div>
-    <div style="font-size:9px;color:#555;margin-top:3px">Se PORTAR.md</div>
-  </div>
-</div>
+  /* Service / Cloudflare */
+  line('a-service-web', 'e-loopia', { color: GRAY, width: 1, dash: '4 3', opacity: 0.45 });
 
-<!-- ══════════════════════════════════════════
-     FOOTER
-══════════════════════════════════════════ -->
-<div style="border-top:1px solid #1a1a1a;margin-top:8px;padding-top:10px;display:flex;justify-content:space-between;color:#333;font-size:9px">
-  <span>Dalboviken Holding AB · 559582-8152 · Luleå, Sverige</span>
-  <span>System Map v1.0 · 2026-06-14 · Claude Sonnet 4.6</span>
-  <span>Workspace: C:\Users\dalbo\DALBOVIKEN\SYSTEM_MAP.html</span>
-</div>
+  /* Media pipeline → n8n */
+  line('b-media-pipeline', 'e-n8n', { color: GRAY, width: 1, dash: '4 3', opacity: 0.45 });
 
+  /* OMX-bot → Task Scheduler */
+  line('b-omxbot', 'e-task-sched', { color: YELLOW, width: 1, dash: '4 3', opacity: 0.5 });
+}
+
+/* Rita efter layout är klar */
+window.addEventListener('load', () => {
+  /* Sätt canvas-höjd dynamiskt */
+  const nodes = canvas.querySelectorAll('.node');
+  let maxBottom = 0;
+  nodes.forEach(n => {
+    const b = n.offsetTop + n.offsetHeight;
+    if (b > maxBottom) maxBottom = b;
+  });
+  canvas.style.paddingBottom = (maxBottom + 60) + 'px';
+  svg.setAttribute('height', maxBottom + 80);
+  drawAll();
+});
+window.addEventListener('resize', drawAll);
+</script>
 </body>
 </html>
