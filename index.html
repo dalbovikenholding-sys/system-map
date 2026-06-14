@@ -3,365 +3,533 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dalboviken — Koncernflöde</title>
+<title>Dalboviken — Koncernöversikt</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080c10;
+  --surface: #0f1520;
+  --border: #1e293b;
+  --green: #4ade80;
+  --green-dim: #166534;
+  --blue: #60a5fa;
+  --blue-dim: #1e3a6e;
+  --yellow: #fbbf24;
+  --yellow-dim: #451a03;
+  --orange: #fb923c;
+  --orange-dim: #431407;
+  --purple: #a78bfa;
+  --purple-dim: #2e1065;
+  --cyan: #22d3ee;
+  --cyan-dim: #0c4a6e;
+  --indigo: #818cf8;
+  --indigo-dim: #1e1b4b;
+  --slate: #94a3b8;
+  --slate-dim: #1e293b;
+}
+
 html, body {
-  background: #0a0a0a;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   color: #e2e8f0;
-  overflow: auto;
+  overflow-x: auto;
   min-height: 100vh;
 }
-h1 {
+
+/* ─── Header ─── */
+header {
   text-align: center;
-  padding: 36px 0 0;
-  font-size: 1.3rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  padding: 40px 24px 28px;
+}
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #94a3b8;
 }
-h1 span { color: #4ade80; }
+header h1 em { color: var(--green); font-style: normal; }
+header p {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #334155;
+  letter-spacing: 0.04em;
+}
 
-#legend {
+/* ─── Holding ─── */
+.holding-wrap {
   display: flex;
-  gap: 20px;
   justify-content: center;
-  padding: 14px 0 0;
-  flex-wrap: wrap;
+  padding: 0 24px 0;
 }
-#legend span {
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #64748b;
-}
-#legend b {
-  display: inline-block;
-  width: 26px;
-  height: 2.5px;
-  border-radius: 2px;
-}
-
-#canvas {
-  position: relative;
-  width: 3400px;
-  margin: 0;
-  padding: 24px 40px 100px;
-}
-svg#lines {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  overflow: visible;
-}
-
-/* Node base */
-.node {
-  position: absolute;
-  z-index: 1;
-  border-radius: 12px;
-  padding: 11px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
+.holding-card {
+  background: #052e16;
+  border: 1.5px solid var(--green);
+  border-radius: 14px;
+  padding: 16px 40px;
   text-align: center;
-  white-space: nowrap;
-  border: 1px solid transparent;
+  box-shadow: 0 0 0 4px rgba(74,222,128,0.1), 0 12px 40px rgba(74,222,128,0.15);
 }
-.node small {
+.holding-card h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #bbf7d0;
+  letter-spacing: 0.02em;
+}
+.holding-card small {
   display: block;
-  font-size: 10.5px;
-  font-weight: 400;
-  opacity: 0.58;
+  font-size: 0.72rem;
+  color: #4ade80;
+  opacity: 0.6;
   margin-top: 3px;
 }
 
-/* Node types */
-.n-holding {
-  background: #052e16; border-color: #4ade80; color: #bbf7d0;
-  border-radius: 16px; padding: 16px 36px; font-size: 17px; font-weight: 700;
-  box-shadow: 0 0 0 5px rgba(74,222,128,0.12), 0 12px 40px rgba(74,222,128,0.2);
+/* ─── Connector SVG ─── */
+#connector-svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
 }
-.n-company { background: #111827; border-color: #374151; color: #f1f5f9; font-size: 13.5px; font-weight: 600; }
-.n-app     { background: #0f172a; border-color: #1e40af; color: #93c5fd; }
-.n-bot     { background: #1c1000; border-color: #92400e; color: #fcd34d; }
-.n-db      { background: #052e16; border-color: #166534; color: #86efac; }
-.n-pay     { background: #1e0a3c; border-color: #7c3aed; color: #c4b5fd; }
-.n-social  { background: #1a0a00; border-color: #92400e; color: #fb923c; }
-.n-ext     { background: #111; border-color: #334155; color: #94a3b8; border-style: dashed; }
-.n-ai      { background: #0c1a2e; border-color: #0ea5e9; color: #7dd3fc; }
-.n-proj    { background: #0d0d1f; border-color: #6366f1; color: #a5b4fc; border-style: dashed; }
 
-/* Row labels */
-.row-lbl {
-  position: absolute;
-  z-index: 0;
-  left: 0;
-  font-size: 9px;
+/* ─── Companies grid ─── */
+.companies {
+  display: flex;
+  gap: 12px;
+  padding: 0 24px;
+  min-width: max-content;
+}
+
+/* ─── Company card ─── */
+.company {
+  width: 220px;
+  flex: 0 0 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.company-header {
+  padding: 13px 14px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.company-header h3 {
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.13em;
+  color: #f1f5f9;
+  line-height: 1.3;
+}
+.company-header span {
+  display: block;
+  font-size: 0.68rem;
+  color: #475569;
+  margin-top: 3px;
+}
+.company-body {
+  padding: 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ─── Section inside company ─── */
+.section-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #1e293b;
-  writing-mode: horizontal-tb;
+  color: #334155;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  padding-left: 2px;
+}
+
+/* ─── Chips ─── */
+.chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  background: #0d1625;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+.chip .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.chip b {
+  font-weight: 600;
+  display: block;
+}
+.chip span {
+  font-size: 0.63rem;
+  color: #475569;
+  display: block;
+}
+
+/* color variants */
+.chip-web   { border-color: var(--blue-dim);   } .chip-web   .dot { background: var(--blue); }
+.chip-bot   { border-color: var(--yellow-dim); } .chip-bot   .dot { background: var(--yellow); }
+.chip-proj  { border-color: var(--indigo-dim); } .chip-proj  .dot { background: var(--indigo); }
+.chip-social{ border-color: var(--orange-dim); } .chip-social .dot { background: var(--orange); }
+.chip-db    { border-color: var(--green-dim);  } .chip-db    .dot { background: var(--green); }
+.chip-pay   { border-color: var(--purple-dim); } .chip-pay   .dot { background: var(--purple); }
+.chip-ext   { border-color: var(--slate-dim);  } .chip-ext   .dot { background: var(--slate); }
+
+/* ─── PROJEKT section ─── */
+.projekt-wrap {
+  padding: 32px 24px 0;
+}
+.projekt-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #334155;
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+.projekt-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.projekt-chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--indigo-dim);
+  border: 1px solid #312e81;
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-size: 0.75rem;
+}
+.projekt-chip b { color: #c7d2fe; display: block; font-weight: 600; }
+.projekt-chip span { color: #6366f1; font-size: 0.65rem; display: block; margin-top: 2px; }
+
+/* ─── Infra section ─── */
+.infra-wrap {
+  padding: 28px 24px 48px;
+}
+.infra-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #334155;
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+.infra-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.infra-chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #0d1118;
+  border: 1px dashed #1e293b;
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-size: 0.75rem;
+}
+.infra-chip b { color: #94a3b8; display: block; font-weight: 600; }
+.infra-chip span { color: #475569; font-size: 0.65rem; display: block; margin-top: 2px; }
+.infra-chip.ai    { border-color: #0c4a6e; } .infra-chip.ai b { color: var(--cyan); }
+.infra-chip.pay   { border-color: var(--purple-dim); } .infra-chip.pay b { color: var(--purple); }
+.infra-chip.chain { border-color: #1e293b; background: #0a1020; }
+
+/* arrow between chain items */
+.arrow {
+  color: #334155;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* hairline divider */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 28px 24px 0;
 }
 </style>
 </head>
 <body>
 
-<h1><span>Dalboviken</span>&nbsp; Koncernflöde</h1>
+<header>
+  <h1><em>Dalboviken</em> Koncernöversikt</h1>
+  <p>Moderbolag · Dotterbolag · System · Infrastruktur</p>
+</header>
 
-<div id="legend">
-  <span><b style="background:#4ade80"></b>Ägarskap</span>
-  <span><b style="background:#60a5fa"></b>Webb</span>
-  <span><b style="background:#fbbf24"></b>Bot/verktyg</span>
-  <span><b style="background:#fb923c"></b>Sociala medier</span>
-  <span><b style="background:#4ade80;opacity:.65"></b>Databas</span>
-  <span><b style="background:#22d3ee"></b>Claude API</span>
-  <span><b style="background:#a78bfa"></b>Betalflöde</span>
-  <span><b style="background:#818cf8"></b>PROJEKT (Holding-direkt)</span>
-  <span><b style="background:#94a3b8;border-top:1px dashed;height:0"></b>Infrastruktur / extern</span>
-</div>
-
-<div id="canvas">
-  <svg id="lines"></svg>
-
-  <!-- ── RAD 0: Holding ── -->
-  <div class="node n-holding" id="holding" style="top:50px;left:1540px;">
-    Dalboviken Holding AB
+<!-- Holding -->
+<div class="holding-wrap">
+  <div class="holding-card" id="hld">
+    <h2>Dalboviken Holding AB</h2>
     <small>559582-8152 · Moderbolag · Luleå</small>
   </div>
+</div>
 
-  <!-- ── RAD 1: Dotterbolag (y=210) ── -->
-  <div class="node n-company" id="c-drift"        style="top:210px;left:40px;">Dalboviken Drift AB<small>Nyheter &amp; sociala medier</small></div>
-  <div class="node n-company" id="c-fast"         style="top:210px;left:400px;">Dalboviken Fastigheter AB<small>Fastighetsförvaltning</small></div>
-  <div class="node n-company" id="c-media"        style="top:210px;left:800px;">Dalboviken Media AB<small>Helautomatiserad webbyrå</small></div>
-  <div class="node n-company" id="c-ungkraft"     style="top:210px;left:1200px;">UngKraft Norrbotten AB<small>Ungdomstjänster</small></div>
-  <div class="node n-company" id="c-hyrhusvagnen" style="top:210px;left:1640px;">Hyrhusvagnen<small>Husvagnsuthyrning</small></div>
-  <div class="node n-company" id="c-grannfix"     style="top:210px;left:2040px;">Grannfix<small>Granntjänstmarknadsplats</small></div>
-  <div class="node n-company" id="c-service"      style="top:210px;left:2440px;">Dalboviken Service<small>Hantverkartjänster</small></div>
-  <div class="node n-company" id="c-tomrum"       style="top:210px;left:2860px;">Dalboviken Tomrum<small>Dödsbo &amp; husröjning</small></div>
+<!-- SVG connector lines Holding → companies -->
+<svg id="connector-svg" height="60"></svg>
 
-  <!-- ── RAD 2: Webbsidor + DriftCentral (y=380) ── -->
-  <div class="node n-app" id="a-drift-web"         style="top:380px;left:40px;">Drift AB Webb<small>Next.js 16 · port 3002</small></div>
-  <div class="node n-app" id="a-fast-web"          style="top:380px;left:400px;">fastigheter.dalboviken.se<small>Statisk HTML · Loopia</small></div>
-  <div class="node n-app" id="a-media-web"         style="top:380px;left:800px;">Media Webb<small>Vite + React · Vercel</small></div>
-  <div class="node n-app" id="a-ungkraft-web"      style="top:380px;left:1200px;">UngKraft App<small>Lovable · TanStack Start</small></div>
-  <div class="node n-app" id="a-hyrhusvagnen-web"  style="top:380px;left:1640px;">hyrhusvagnen.se<small>Next.js 16 · Vercel</small></div>
-  <div class="node n-app" id="a-grannfix-web"      style="top:380px;left:2040px;">grannfix.se<small>Next.js 16 · Vercel</small></div>
-  <div class="node n-app" id="a-service-web"       style="top:380px;left:2440px;">service.dalboviken.se<small>TanStack · Cloudflare Workers</small></div>
-  <div class="node n-app" id="a-tomrum-web"        style="top:380px;left:2860px;">tomrum.dalboviken.se<small>Statisk Vite · Vercel</small></div>
-  <!-- DriftCentral: PROJEKT under Holding, proxar till Växel + Mailbot -->
-  <div class="node n-proj" id="b-driftcentral"     style="top:380px;left:3140px;">DriftCentral<small>Proxy-hub · Vite · port 5173</small></div>
+<!-- Companies -->
+<div class="companies" id="companies">
 
-  <!-- ── RAD 3: Bots / verktyg (y=560) ── -->
-  <div class="node n-bot"  id="b-drift-ai"         style="top:560px;left:40px;">AI-inläggsgenerator<small>Anthropic SDK + Prisma</small></div>
-  <!-- OMX-bot: PROJEKT under Holding -->
-  <div class="node n-proj" id="b-omxbot"           style="top:560px;left:560px;">OMX-bot<small>PROJEKT · Python · Streamlit · port 8501</small></div>
-  <div class="node n-bot"  id="b-media-pipeline"   style="top:560px;left:800px;">Mediapipeline<small>Python: prospect→bygg→deliver</small></div>
-  <div class="node n-bot"  id="b-flux"             style="top:560px;left:1080px;">Flux-bildgenerator<small>Python · Replicate API</small></div>
-  <div class="node n-bot"  id="b-ungkraft-edge"    style="top:560px;left:1380px;">Edge Functions<small>Deno · Supabase · Swish</small></div>
-  <div class="node n-bot"  id="b-mailbot-hyrhus"   style="top:560px;left:1740px;">Mailbot Hyrhusvagnen<small>PowerShell + MailKit</small></div>
-  <!-- Mailbot Dalboviken: delad resurs under Holding -->
-  <div class="node n-proj" id="b-mailbot-main"     style="top:560px;left:2160px;">Mailbot Dalboviken<small>PROJEKT · PowerShell · port 8765</small></div>
-  <div class="node n-bot"  id="b-vaxel"            style="top:560px;left:2560px;">AI-telefonväxel<small>Express · port 3100</small></div>
+  <!-- 1. Drift AB -->
+  <div class="company" id="co-drift">
+    <div class="company-header">
+      <h3>Dalboviken Drift AB</h3>
+      <span>Nyheter &amp; sociala medier</span>
+    </div>
+    <div class="company-body">
+      <div class="section-label">Webb</div>
+      <div class="chip chip-web"><div class="dot"></div><div><b>Drift AB Webb</b><span>Next.js 16 · port 3002</span></div></div>
 
-  <!-- ── RAD 4: Sociala medier (y=740) ── -->
-  <div class="node n-social" id="s-ig-drift"       style="top:740px;left:40px;">@dalboviken_drift<small>Reels · Stories</small></div>
-  <div class="node n-social" id="s-ig-fast"        style="top:740px;left:400px;">@dalboviken_fastigheter<small>Reels (manuellt)</small></div>
-  <div class="node n-social" id="s-ig-media"       style="top:740px;left:800px;">@dalboviken_media<small>Reels · Outreach</small></div>
-  <div class="node n-social" id="s-ig-ungkraft"    style="top:740px;left:1200px;">@ungkraft_norrbotten<small>Reels · Stories</small></div>
-  <div class="node n-social" id="s-reel-worker"    style="top:740px;left:1640px;">Reel-worker<small>Python pipeline · processlås</small></div>
+      <div class="section-label">Bot</div>
+      <div class="chip chip-bot"><div class="dot"></div><div><b>AI-inläggsgenerator</b><span>Anthropic SDK + Prisma</span></div></div>
 
-  <!-- ── RAD 5: Databaser (y=920) ── -->
-  <div class="node n-db" id="d-prisma"             style="top:920px;left:40px;">SQLite / Prisma<small>Drift AB · dev.db</small></div>
-  <div class="node n-db" id="d-supa-media"         style="top:920px;left:800px;">Supabase Media<small>prospects · customers · logs</small></div>
-  <div class="node n-db" id="d-supa-ungkraft"      style="top:920px;left:1200px;">Supabase UngKraft<small>Swish → lön → bokföring</small></div>
-  <div class="node n-db" id="d-supa-hyrhus"        style="top:920px;left:1640px;">Supabase Hyrhusvagnen<small>Bokningar · sociala tokens</small></div>
-  <div class="node n-db" id="d-supa-grannfix"      style="top:920px;left:2040px;">Supabase Grannfix<small>pibgnbzgluwdskkaipui</small></div>
+      <div class="section-label">Socialt</div>
+      <div class="chip chip-social"><div class="dot"></div><div><b>@dalboviken_drift</b><span>Reels · Stories</span></div></div>
 
-  <!-- ── RAD 6: API-tjänster (y=1110) ── -->
-  <div class="node n-ext" id="e-task-sched"        style="top:1110px;left:430px;">Task Scheduler<small>Windows · OMX-bot 17:45</small></div>
-  <div class="node n-ext" id="e-n8n"               style="top:1110px;left:720px;">n8n<small>Automatisering · webhooks</small></div>
-  <div class="node n-ai"  id="e-claude"            style="top:1110px;left:1060px;">Claude API<small>Anthropic · alla AI-bots + växel</small></div>
-  <div class="node n-ext" id="e-replicate"         style="top:1110px;left:1400px;">Replicate<small>Flux bildgenerering</small></div>
-  <div class="node n-ext" id="e-resend"            style="top:1110px;left:1740px;">Resend / SMTP<small>Transaktionell e-post</small></div>
-  <div class="node n-pay" id="e-pay"               style="top:1110px;left:2100px;">Swish · Gigapay · Fortnox<small>Betalning · lön · bokföring</small></div>
-  <div class="node n-ext" id="e-github"            style="top:1110px;left:2560px;">GitHub<small>dalbovikenholding-sys · repos</small></div>
+      <div class="section-label">Databas</div>
+      <div class="chip chip-db"><div class="dot"></div><div><b>SQLite / Prisma</b><span>dev.db · lokal</span></div></div>
+    </div>
+  </div>
 
-  <!-- ── RAD 7: DNS/hosting-kedja (y=1290) ── -->
-  <div class="node n-ext" id="e-loopia"            style="top:1290px;left:760px;">Loopia<small>Domänregistrator</small></div>
-  <div class="node n-ext" id="e-cloudflare"        style="top:1290px;left:1140px;">Cloudflare<small>DNS · CDN · Workers (service)</small></div>
-  <div class="node n-ext" id="e-vercel"            style="top:1290px;left:1600px;">Vercel<small>Media · Hyrhusvagnen · Grannfix · Tomrum</small></div>
+  <!-- 2. Fastigheter -->
+  <div class="company" id="co-fast">
+    <div class="company-header">
+      <h3>Dalboviken Fastigheter AB</h3>
+      <span>Fastighetsförvaltning</span>
+    </div>
+    <div class="company-body">
+      <div class="section-label">Webb</div>
+      <div class="chip chip-web"><div class="dot"></div><div><b>fastigheter.dalboviken.se</b><span>Statisk HTML · Loopia</span></div></div>
 
+      <div class="section-label">Socialt</div>
+      <div class="chip chip-social"><div class="dot"></div><div><b>@dalboviken_fastigheter</b><span>Reels (manuellt)</span></div></div>
+    </div>
+  </div>
+
+  <!-- 3. Media -->
+  <div class="company" id="co-media">
+    <div class="company-header">
+      <h3>Dalboviken Media AB</h3>
+      <span>Helautomatiserad webbyrå</span>
+    </div>
+    <div class="company-body">
+      <div class="section-label">Webb</div>
+      <div class="chip chip-web"><div class="dot"></div><div><b>Media Webb</b><span>Vite + React · Vercel</span></div></div>
+
+      <div class="section-label">Bots</div>
+      <div class="chip chip-bot"><div class="dot"></div><div><b>Mediapipeline</b><span>Python: prospect→bygg→deliver</span></div></div>
+      <div class="chip chip-bot"><div class="dot"></div><div><b>Flux-bildgenerator</b><span>Python · Replicate API</span></div></div>
+
+      <div class="section-label">Socialt</div>
+      <div class="chip chip-social"><div class="dot"></div><div><b>@dalboviken_media</b><span>Reels · Outreach</span></div></div>
+
+      <div class="section-label">Databas</div>
+      <div class="chip chip-db"><div class="dot"></div><div><b>Supabase Media</b><span>prospects · customers · logs</span></div></div>
+    </div>
+  </div>
+
+  <!-- 4. UngKraft -->
+  <div class="company" id="co-ungkraft">
+    <div class="company-header">
+      <h3>UngKraft Norrbotten AB</h3>
+      <span>Ungdomstjänster</span>
+    </div>
+    <div class="company-body">
+      <div class="section-label">App</div>
+      <div class="chip chip-web"><div class="dot"></div><div><b>UngKraft App</b><span>Lovable · TanStack Start</span></div></div>
+
+      <div class="section-label">Backend</div>
+      <div class="chip chip-bot"><div class="dot"></div><div><b>Edge Functions</b><span>Deno · Supabase · Swish</span></div></div>
+
+      <div class="section-label">Socialt</div>
+      <div class="chip chip-social"><div class="dot"></div><div><b>@ungkraft_norrbotten</b><span>Reels · Stories</span></div></div>
+
+      <div class="section-label">Databas</div>
+      <div class="chip chip-db"><div class="dot"></div><div><b>Supabase UngKraft</b><span>Swish → lön → bokföring</span></div></div>
+
+      <div class="section-label">Betalning</div>
+      <div class="chip chip-pay"><div class="dot"></div><div><b>Swish · Gigapay · Fortnox</b><span>Betalning · lön · bokföring</span></div></div>
+    </div>
+  </div>
+
+  <!-- 5. Hyrhusvagnen -->
+  <div class="company" id="co-hyrhus">
+    <div class="company-header">
+      <h3>Hyrhusvagnen</h3>
+      <span>Husvagnsuthyrning</span>
+    </div>
+    <div class="company-body">
+      <div class="section-label">Webb</div>
+      <div class="chip chip-web"><div class="dot"></div><div><b>hyrhusvagnen.se</b><span>Next.js 16 · Vercel</span></div></div>
+
+      <div class="section-label">Bot</div>
+      <div class="chip chip-bot"><div class="dot"></div><div><b>Mailbot Hyrhusvagnen</b><span>PowerShell + MailKit</span></div></div>
+
+      <div class="section-label">Databas</div>
+      <div class="chip chip-db"><div class="dot"></div><div><b>Supabase Hyrhusvagnen</b><span>Bokningar · sociala tokens</span></div></div>
+    </div>
+  </div>
+
+  <!-- 6. Grannfix -->
+  <div class="company" id="co-grannfix">
+    <div class="company-header">
+      <h3>Grannfix</h3>
+      <span>Granntjänstmarknadsplats</span>
+    </div>
+    <div class="company-body">
+      <div class="section-label">Webb</div>
+      <div class="chip chip-web"><div class="dot"></div><div><b>grannfix.se</b><span>Next.js 16 · Vercel</span></div></div>
+
+      <div class="section-label">Databas</div>
+      <div class="chip chip-db"><div class="dot"></div><div><b>Supabase Grannfix</b><span>pibgnbzgluwdskkaipui</span></div></div>
+    </div>
+  </div>
+
+  <!-- 7. Service -->
+  <div class="company" id="co-service">
+    <div class="company-header">
+      <h3>Dalboviken Service</h3>
+      <span>Hantverkartjänster</span>
+    </div>
+    <div class="company-body">
+      <div class="section-label">Webb</div>
+      <div class="chip chip-web"><div class="dot"></div><div><b>service.dalboviken.se</b><span>TanStack · Cloudflare Workers</span></div></div>
+
+      <div class="section-label">Bot</div>
+      <div class="chip chip-bot"><div class="dot"></div><div><b>AI-telefonväxel</b><span>Express · port 3100</span></div></div>
+    </div>
+  </div>
+
+  <!-- 8. Tomrum -->
+  <div class="company" id="co-tomrum">
+    <div class="company-header">
+      <h3>Dalboviken Tomrum</h3>
+      <span>Dödsbo &amp; husröjning</span>
+    </div>
+    <div class="company-body">
+      <div class="section-label">Webb</div>
+      <div class="chip chip-web"><div class="dot"></div><div><b>tomrum.dalboviken.se</b><span>Statisk Vite · Vercel</span></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PROJEKT (Holding-direkta resurser) -->
+<div class="divider"></div>
+<div class="projekt-wrap">
+  <div class="projekt-label">PROJEKT · Holding-direkta resurser</div>
+  <div class="projekt-row">
+    <div class="projekt-chip">
+      <div><b>OMX-bot</b><span>Python · Streamlit · port 8501 · Task Scheduler 17:45</span></div>
+    </div>
+    <div class="projekt-chip">
+      <div><b>Mailbot Dalboviken</b><span>PowerShell + MailKit · port 8765 · delad resurs</span></div>
+    </div>
+    <div class="projekt-chip">
+      <div><b>DriftCentral</b><span>Vite · port 5173 · proxar /vaxel → :3100, /emailagent → :8765</span></div>
+    </div>
+    <div class="projekt-chip">
+      <div><b>Reel-worker</b><span>Python pipeline · processlås via .reel-worker.lock</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Infrastruktur -->
+<div class="divider"></div>
+<div class="infra-wrap">
+  <div class="infra-label">Delad infrastruktur &amp; externa tjänster</div>
+  <div class="infra-row">
+
+    <!-- DNS-kedja -->
+    <div class="infra-chip chain">
+      <div><b>Loopia</b><span>Domänregistrator</span></div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="infra-chip chain">
+      <div><b>Cloudflare</b><span>DNS · CDN · Workers</span></div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="infra-chip chain">
+      <div><b>Vercel</b><span>Hosting · 4 sajter</span></div>
+    </div>
+
+    <div class="arrow" style="color:#1e293b">│</div>
+
+    <div class="infra-chip ai">
+      <div><b>Claude API</b><span>Anthropic · alla AI-bots</span></div>
+    </div>
+    <div class="infra-chip">
+      <div><b>Supabase</b><span>4 projekt-instanser</span></div>
+    </div>
+    <div class="infra-chip">
+      <div><b>GitHub</b><span>dalbovikenholding-sys</span></div>
+    </div>
+    <div class="infra-chip">
+      <div><b>Replicate</b><span>Flux bildgenerering</span></div>
+    </div>
+    <div class="infra-chip">
+      <div><b>Resend / SMTP</b><span>Transaktionell e-post</span></div>
+    </div>
+    <div class="infra-chip">
+      <div><b>n8n</b><span>Automatisering · webhooks</span></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-const svg    = document.getElementById('lines');
-const canvas = document.getElementById('canvas');
+/* Rita linjer från Holding-kortet ner till varje bolagskort */
+function drawConnectors() {
+  const svg    = document.getElementById('connector-svg');
+  const hld    = document.getElementById('hld');
+  const cos    = document.getElementById('companies');
+  const cards  = cos.querySelectorAll('.company');
+  if (!cards.length) return;
 
-function get(id) {
-  const el = document.getElementById(id);
-  if (!el) return null;
-  const cr = canvas.getBoundingClientRect();
-  const er = el.getBoundingClientRect();
-  return {
-    x:      er.left - cr.left + er.width / 2,
-    top:    er.top  - cr.top,
-    bottom: er.top  - cr.top + er.height,
-    left:   er.left - cr.left,
-    right:  er.left - cr.left + er.width,
-    cy:     er.top  - cr.top  + er.height / 2,
-  };
-}
+  const svgRect  = svg.getBoundingClientRect();
+  const hldRect  = hld.getBoundingClientRect();
+  const cosRect  = cos.getBoundingClientRect();
 
-function line(fromId, toId, { color='#4ade80', width=1.5, dash='', opacity=0.55 } = {}) {
-  const a = get(fromId), b = get(toId);
-  if (!a || !b) return;
-  const x1=a.x, y1=a.bottom, x2=b.x, y2=b.top;
-  const my=(y1+y2)/2;
-  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
-  p.setAttribute('d', `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`);
-  p.setAttribute('fill','none');
-  p.setAttribute('stroke', color);
-  p.setAttribute('stroke-width', width);
-  p.setAttribute('stroke-opacity', opacity);
-  if (dash) p.setAttribute('stroke-dasharray', dash);
-  svg.appendChild(p);
-}
+  /* Holding bottom-center i SVG-koordinater */
+  const hx = hldRect.left + hldRect.width / 2 - svgRect.left;
+  const hy = hldRect.bottom - svgRect.top;
+  const svgH = cosRect.top - svgRect.top + 4;
 
-/* Horisontell kedjelinje med pil: höger kant → vänster kant */
-function hline(fromId, toId, { color='#475569', width=1.5, dash='', opacity=0.65 } = {}) {
-  const a = get(fromId), b = get(toId);
-  if (!a || !b) return;
-  const x1=a.right, y1=a.cy, x2=b.left, y2=b.cy;
-  const mx=(x1+x2)/2;
-  const markId='m'+fromId+toId;
-  const defs = svg.querySelector('defs') || (() => {
-    const d=document.createElementNS('http://www.w3.org/2000/svg','defs');
-    svg.prepend(d); return d;
-  })();
-  if (!document.getElementById(markId)) {
-    const mk = document.createElementNS('http://www.w3.org/2000/svg','marker');
-    mk.setAttribute('id',markId); mk.setAttribute('markerWidth','8');
-    mk.setAttribute('markerHeight','8'); mk.setAttribute('refX','7');
-    mk.setAttribute('refY','4'); mk.setAttribute('orient','auto');
-    const pg = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    pg.setAttribute('points','0 0, 8 4, 0 8');
-    pg.setAttribute('fill',color); pg.setAttribute('fill-opacity',opacity);
-    mk.appendChild(pg); defs.appendChild(mk);
-  }
-  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
-  p.setAttribute('d', `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`);
-  p.setAttribute('fill','none');
-  p.setAttribute('stroke', color);
-  p.setAttribute('stroke-width', width);
-  p.setAttribute('stroke-opacity', opacity);
-  if (dash) p.setAttribute('stroke-dasharray', dash);
-  p.setAttribute('marker-end',`url(#${markId})`);
-  svg.appendChild(p);
-}
-
-function drawAll() {
+  svg.setAttribute('height', svgH);
   svg.innerHTML = '';
-  const G='#4ade80', GR='#475569', B='#60a5fa', Y='#fbbf24',
-        OR='#fb923c', PU='#a78bfa', CY='#22d3ee', IN='#818cf8';
 
-  /* Holding → dotterbolag */
-  ['c-drift','c-fast','c-media','c-ungkraft','c-hyrhusvagnen','c-grannfix','c-service','c-tomrum']
-    .forEach(id => line('holding', id, {color:G, width:2.5, opacity:0.72}));
+  cards.forEach(card => {
+    const cr = card.getBoundingClientRect();
+    const cx = cr.left + cr.width / 2 - svgRect.left;
+    const cy = cr.top - svgRect.top;
+    const my = (hy + cy) / 2;
 
-  /* Holding → PROJEKT (lila streckad) */
-  ['b-omxbot','b-mailbot-main','b-driftcentral']
-    .forEach(id => line('holding', id, {color:IN, width:1.8, dash:'8 5', opacity:0.6}));
-
-  /* Dotterbolag → webbsidor */
-  [['c-drift','a-drift-web'],['c-fast','a-fast-web'],['c-media','a-media-web'],
-   ['c-ungkraft','a-ungkraft-web'],['c-hyrhusvagnen','a-hyrhusvagnen-web'],
-   ['c-grannfix','a-grannfix-web'],['c-service','a-service-web'],['c-tomrum','a-tomrum-web']]
-    .forEach(([f,t]) => line(f,t,{color:B, width:1.5}));
-
-  /* Webb/bolag → bots */
-  line('a-drift-web',        'b-drift-ai',       {color:Y, width:1.5});
-  line('a-media-web',        'b-media-pipeline', {color:Y, width:1.5});
-  line('b-media-pipeline',   'b-flux',           {color:Y, width:1.2});
-  line('a-ungkraft-web',     'b-ungkraft-edge',  {color:Y, width:1.5});
-  line('a-hyrhusvagnen-web', 'b-mailbot-hyrhus', {color:Y, width:1.5});
-  line('c-service',          'b-vaxel',          {color:Y, width:1.5});
-
-  /* DriftCentral proxar till Växel + Mailbot */
-  line('b-driftcentral', 'b-vaxel',        {color:IN, width:1.2, dash:'5 4', opacity:0.5});
-  line('b-driftcentral', 'b-mailbot-main', {color:IN, width:1.2, dash:'5 4', opacity:0.5});
-
-  /* Bots/webb → Instagram */
-  line('b-drift-ai',       's-ig-drift',    {color:OR, width:1.2});
-  line('b-media-pipeline', 's-ig-media',    {color:OR, width:1.2});
-  line('a-ungkraft-web',   's-ig-ungkraft', {color:OR, width:1.2});
-  line('b-drift-ai',       's-reel-worker', {color:OR, width:1, dash:'4 3'});
-  line('b-media-pipeline', 's-reel-worker', {color:OR, width:1, dash:'4 3'});
-
-  /* → Databaser */
-  line('a-drift-web',        'd-prisma',        {color:G, width:1.2});
-  line('b-media-pipeline',   'd-supa-media',    {color:G, width:1.2});
-  line('b-ungkraft-edge',    'd-supa-ungkraft', {color:G, width:1.5});
-  line('a-hyrhusvagnen-web', 'd-supa-hyrhus',   {color:G, width:1.2});
-  line('a-grannfix-web',     'd-supa-grannfix', {color:G, width:1.5});
-
-  /* Bots → Claude API */
-  ['b-drift-ai','b-media-pipeline','b-mailbot-hyrhus','b-mailbot-main','b-vaxel','b-ungkraft-edge']
-    .forEach(id => line(id,'e-claude',{color:CY,width:1.2,dash:'6 4',opacity:0.45}));
-
-  /* Webb-appar → Cloudflare (DNS) */
-  ['a-drift-web','a-fast-web','a-media-web','a-ungkraft-web',
-   'a-hyrhusvagnen-web','a-grannfix-web','a-service-web','a-tomrum-web']
-    .forEach(id => line(id,'e-cloudflare',{color:GR,width:1,dash:'4 3',opacity:0.28}));
-
-  /* DNS-kedja: Loopia → Cloudflare → Vercel */
-  hline('e-loopia',     'e-cloudflare', {color:'#94a3b8', width:2, opacity:0.7});
-  hline('e-cloudflare', 'e-vercel',     {color:'#94a3b8', width:2, opacity:0.7});
-
-  /* → GitHub */
-  line('a-drift-web',    'e-github', {color:GR,width:1,dash:'4 3',opacity:0.38});
-  line('a-grannfix-web', 'e-github', {color:GR,width:1,dash:'4 3',opacity:0.38});
-
-  /* → Replicate */
-  line('b-flux', 'e-replicate', {color:GR,width:1.2,dash:'4 3',opacity:0.55});
-
-  /* → Resend */
-  line('b-mailbot-main',   'e-resend', {color:GR,width:1.2,dash:'4 3',opacity:0.55});
-  line('b-mailbot-hyrhus', 'e-resend', {color:GR,width:1.2,dash:'4 3',opacity:0.55});
-
-  /* UngKraft → betalflöde */
-  line('b-ungkraft-edge', 'e-pay', {color:PU, width:2});
-
-  /* → n8n */
-  line('b-media-pipeline', 'e-n8n', {color:GR,width:1.2,dash:'4 3',opacity:0.5});
-
-  /* OMX-bot → Task Scheduler */
-  line('b-omxbot', 'e-task-sched', {color:Y,width:1.2,dash:'4 3',opacity:0.55});
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', `M ${hx} ${hy} C ${hx} ${my}, ${cx} ${my}, ${cx} ${cy}`);
+    p.setAttribute('fill','none');
+    p.setAttribute('stroke','#4ade80');
+    p.setAttribute('stroke-width','1.5');
+    p.setAttribute('stroke-opacity','0.5');
+    svg.appendChild(p);
+  });
 }
 
-window.addEventListener('load', () => {
-  const nodes = canvas.querySelectorAll('.node');
-  let maxB = 0, maxR = 0;
-  nodes.forEach(n => {
-    const b = n.offsetTop + n.offsetHeight;
-    const r = n.offsetLeft + n.offsetWidth;
-    if (b > maxB) maxB = b;
-    if (r > maxR) maxR = r;
-  });
-  canvas.style.height  = (maxB + 80) + 'px';
-  canvas.style.width   = Math.max(3400, maxR + 60) + 'px';
-  svg.setAttribute('height', maxB + 80);
-  svg.setAttribute('width',  Math.max(3400, maxR + 60));
-  drawAll();
-});
-window.addEventListener('resize', drawAll);
+window.addEventListener('load', drawConnectors);
+window.addEventListener('resize', drawConnectors);
 </script>
 </body>
 </html>
