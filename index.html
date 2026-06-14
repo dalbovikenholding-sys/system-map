@@ -171,37 +171,20 @@ svg#lines {
   <div class="node n-db" id="d-supa-hyrhus"   style="top:608px;left:990px;">Supabase Hyrhusvagnen<small>Bokningar · sociala tokens</small></div>
   <div class="node n-db" id="d-supa-grannfix" style="top:608px;left:1195px;">Supabase Grannfix<small>pibgnbzgluwdskkaipui</small></div>
 
-  <!-- ── RAD 6: Externa tjänster — grupperade nära sina användare ── -->
+  <!-- ── RAD 6: API-tjänster — grupperade nära sina användare ── -->
 
-  <!-- Task Scheduler: nära OMX-bot (vänster) -->
   <div class="node n-ext" id="e-task-sched" style="top:718px;left:200px;">Task Scheduler<small>Windows · OMX-bot 17:45</small></div>
+  <div class="node n-ext" id="e-n8n"        style="top:718px;left:430px;">n8n<small>Automatisering · webhooks</small></div>
+  <div class="node n-ai"  id="e-claude"     style="top:718px;left:650px;">Claude API<small>Anthropic · alla AI-bots + växel</small></div>
+  <div class="node n-ext" id="e-replicate"  style="top:718px;left:890px;">Replicate<small>Flux bildgenerering</small></div>
+  <div class="node n-ext" id="e-resend"     style="top:718px;left:1090px;">Resend / SMTP<small>Transaktionell e-post</small></div>
+  <div class="node n-pay" id="e-pay"        style="top:718px;left:1310px;">Swish · Gigapay · Fortnox<small>Betalning · lön · bokföring</small></div>
+  <div class="node n-ext" id="e-github"     style="top:718px;left:1560px;">GitHub<small>dalbovikenholding-sys · repos</small></div>
 
-  <!-- Loopia: under Fastigheter -->
-  <div class="node n-ext" id="e-loopia"     style="top:718px;left:20px;">Loopia<small>Fastigheter-hosting</small></div>
-
-  <!-- n8n: under Media pipeline -->
-  <div class="node n-ext" id="e-n8n"        style="top:718px;left:450px;">n8n<small>Automatisering · webhooks</small></div>
-
-  <!-- Claude API: centrat under botarna som använder det -->
-  <div class="node n-ai"  id="e-claude"     style="top:718px;left:680px;">Claude API<small>Anthropic · alla AI-bots + växel</small></div>
-
-  <!-- Replicate: nära Flux -->
-  <div class="node n-ext" id="e-replicate"  style="top:718px;left:920px;">Replicate<small>Flux bildgenerering</small></div>
-
-  <!-- Resend: nära mailbotarna -->
-  <div class="node n-ext" id="e-resend"     style="top:718px;left:1130px;">Resend / SMTP<small>Transaktionell e-post</small></div>
-
-  <!-- Swish/Pay: under UngKraft edge -->
-  <div class="node n-pay" id="e-pay"        style="top:718px;left:1340px;">Swish · Gigapay · Fortnox<small>Betalning · lön · bokföring</small></div>
-
-  <!-- Cloudflare: under Service -->
-  <div class="node n-ext" id="e-cloudflare" style="top:718px;left:1570px;">Cloudflare Workers<small>service.dalboviken.se hosting</small></div>
-
-  <!-- Vercel: centrat under web-apparna på Vercel -->
-  <div class="node n-ext" id="e-vercel"     style="top:828px;left:980px;">Vercel<small>Media · Hyrhusvagnen · Grannfix · Tomrum</small></div>
-
-  <!-- GitHub: centrat -->
-  <div class="node n-ext" id="e-github"     style="top:828px;left:740px;">GitHub<small>dalbovikenholding-sys · alla repos</small></div>
+  <!-- ── RAD 7: DNS / hosting-kedja: Loopia → Cloudflare → Vercel ── -->
+  <div class="node n-ext" id="e-loopia"      style="top:838px;left:480px;">Loopia<small>Domänregistrator</small></div>
+  <div class="node n-ext" id="e-cloudflare"  style="top:838px;left:720px;">Cloudflare<small>DNS · CDN · Workers (service)</small></div>
+  <div class="node n-ext" id="e-vercel"      style="top:838px;left:1020px;">Vercel<small>Hosting · Media · Hyrhus · Grannfix · Tomrum</small></div>
 
 </div>
 
@@ -235,6 +218,41 @@ function line(fromId, toId, { color='#4ade80', width=1.5, dash='', opacity=0.55 
   p.setAttribute('stroke-width', width);
   p.setAttribute('stroke-opacity', opacity);
   if (dash) p.setAttribute('stroke-dasharray', dash);
+  svg.appendChild(p);
+}
+
+/* Horisontell kedjelinje: höger kant → vänster kant på samma rad */
+function hline(fromId, toId, { color='#475569', width=1.5, dash='', opacity=0.6 } = {}) {
+  const a = get(fromId), b = get(toId);
+  if (!a || !b) return;
+  const x1=a.right, y1=(a.top+a.bottom)/2;
+  const x2=b.left,  y2=(b.top+b.bottom)/2;
+  const mx = (x1+x2)/2;
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d', `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`);
+  p.setAttribute('fill','none');
+  p.setAttribute('stroke', color);
+  p.setAttribute('stroke-width', width);
+  p.setAttribute('stroke-opacity', opacity);
+  if (dash) p.setAttribute('stroke-dasharray', dash);
+  /* Arrow marker */
+  const markerId = 'arr-'+fromId+toId;
+  let marker = document.getElementById(markerId);
+  if (!marker) {
+    const defs = svg.querySelector('defs') || (() => { const d=document.createElementNS('http://www.w3.org/2000/svg','defs'); svg.prepend(d); return d; })();
+    marker = document.createElementNS('http://www.w3.org/2000/svg','marker');
+    marker.setAttribute('id', markerId);
+    marker.setAttribute('markerWidth','7'); marker.setAttribute('markerHeight','7');
+    marker.setAttribute('refX','6'); marker.setAttribute('refY','3.5');
+    marker.setAttribute('orient','auto');
+    const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points','0 0, 7 3.5, 0 7');
+    poly.setAttribute('fill', color);
+    poly.setAttribute('fill-opacity', opacity);
+    marker.appendChild(poly);
+    defs.appendChild(marker);
+  }
+  p.setAttribute('marker-end', `url(#${markerId})`);
   svg.appendChild(p);
 }
 
@@ -288,9 +306,14 @@ function drawAll() {
   ['b-drift-ai','b-media-pipeline','b-mailbot-hyrhus','b-mailbot-main','b-vaxel','b-ungkraft-edge']
     .forEach(id => line(id,'e-claude',{color:CY,width:1,dash:'5 3',opacity:0.45}));
 
-  /* Webb-appar → Vercel */
-  ['a-media-web','a-hyrhusvagnen-web','a-grannfix-web','a-tomrum-web']
-    .forEach(id => line(id,'e-vercel',{color:GRAY,width:1,dash:'4 3',opacity:0.4}));
+  /* Alla webb-appar → Cloudflare (DNS-lager) */
+  ['a-drift-web','a-fast-web','a-media-web','a-ungkraft-web',
+   'a-hyrhusvagnen-web','a-grannfix-web','a-service-web','a-tomrum-web']
+    .forEach(id => line(id,'e-cloudflare',{color:GRAY,width:1,dash:'4 3',opacity:0.3}));
+
+  /* DNS-kedja: Loopia → Cloudflare → Vercel (horisontella pilar) */
+  hline('e-loopia',     'e-cloudflare', {color:'#94a3b8', width:1.5, opacity:0.7});
+  hline('e-cloudflare', 'e-vercel',     {color:'#94a3b8', width:1.5, opacity:0.7});
 
   /* → GitHub */
   line('a-drift-web',    'e-github', {color:GRAY,width:1,dash:'4 3',opacity:0.35});
@@ -305,10 +328,6 @@ function drawAll() {
 
   /* UngKraft → betalflöde */
   line('b-ungkraft-edge', 'e-pay', {color:PU,width:1.5});
-
-  /* Loopia / Cloudflare */
-  line('a-fast-web',    'e-loopia',     {color:GRAY,width:1,dash:'4 3',opacity:0.45});
-  line('a-service-web', 'e-cloudflare', {color:GRAY,width:1,dash:'4 3',opacity:0.45});
 
   /* Media → n8n */
   line('b-media-pipeline', 'e-n8n', {color:GRAY,width:1,dash:'4 3',opacity:0.45});
