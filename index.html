@@ -181,6 +181,8 @@ header p {
 .chip-db    { border-color: var(--green-dim);  } .chip-db    .dot { background: var(--green); }
 .chip-pay   { border-color: var(--purple-dim); } .chip-pay   .dot { background: var(--purple); }
 .chip-ext   { border-color: var(--slate-dim);  } .chip-ext   .dot { background: var(--slate); }
+.chip-fb    { border-color: #1a3a6e;           } .chip-fb    .dot { background: #1877f2; }
+.chip-gsc   { border-color: #1a3a28;           } .chip-gsc   .dot { background: #34a853; }
 
 /* Clickable chips */
 a.chip, a.projekt-chip, a.infra-chip {
@@ -197,6 +199,8 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
   transform: translateY(0);
   opacity: 0.65;
 }
+.infra-chip.subtle { opacity: 0.45; }
+.infra-chip.subtle:hover { opacity: 0.85; }
 
 /* ─── PROJEKT section ─── */
 .projekt-wrap {
@@ -314,7 +318,8 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
       <a class="chip chip-bot" href="https://console.anthropic.com" target="_blank" rel="noopener"><div class="dot"></div><div><b>AI-inläggsgenerator</b><span>Anthropic SDK + Prisma</span></div></a>
 
       <div class="section-label">Socialt</div>
-      <a class="chip chip-social" href="https://instagram.com/dalboviken_drift" target="_blank" rel="noopener"><div class="dot"></div><div><b>@dalboviken_drift</b><span>Reels · Stories</span></div></a>
+      <a class="chip chip-social" href="https://instagram.com/dalboviken_drift" target="_blank" rel="noopener"><div class="dot"></div><div><b>@dalboviken_drift</b><span>Instagram · Reels · Stories</span></div></a>
+      <a class="chip chip-fb" href="https://facebook.com/dalbovikenDrift" target="_blank" rel="noopener"><div class="dot"></div><div><b>Dalboviken Drift</b><span>Facebook-sida</span></div></a>
 
       <div class="section-label">Databas</div>
       <a class="chip chip-db" href="#" target="_blank" rel="noopener"><div class="dot"></div><div><b>SQLite / Prisma</b><span>dev.db · lokal</span></div></a>
@@ -332,7 +337,8 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
       <a class="chip chip-web" href="https://fastigheter.dalboviken.se" target="_blank" rel="noopener"><div class="dot"></div><div><b>fastigheter.dalboviken.se</b><span>Statisk HTML · Loopia</span></div></a>
 
       <div class="section-label">Socialt</div>
-      <a class="chip chip-social" href="https://instagram.com/dalboviken_fastigheter" target="_blank" rel="noopener"><div class="dot"></div><div><b>@dalboviken_fastigheter</b><span>Reels (manuellt)</span></div></a>
+      <a class="chip chip-social" href="https://instagram.com/dalboviken_fastigheter" target="_blank" rel="noopener"><div class="dot"></div><div><b>@dalboviken_fastigheter</b><span>Instagram · Reels (manuellt)</span></div></a>
+      <a class="chip chip-fb" href="https://facebook.com/dalbovikenFastigheter" target="_blank" rel="noopener"><div class="dot"></div><div><b>Dalboviken Fastigheter</b><span>Facebook-sida</span></div></a>
     </div>
   </div>
 
@@ -351,7 +357,8 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
       <a class="chip chip-bot" href="https://replicate.com" target="_blank" rel="noopener"><div class="dot"></div><div><b>Flux-bildgenerator</b><span>Python · Replicate API</span></div></a>
 
       <div class="section-label">Socialt</div>
-      <a class="chip chip-social" href="https://instagram.com/dalboviken_media" target="_blank" rel="noopener"><div class="dot"></div><div><b>@dalboviken_media</b><span>Reels · Outreach</span></div></a>
+      <a class="chip chip-social" href="https://instagram.com/dalboviken_media" target="_blank" rel="noopener"><div class="dot"></div><div><b>@dalboviken_media</b><span>Instagram · Reels · Outreach</span></div></a>
+      <a class="chip chip-fb" href="https://facebook.com/dalbovikenMedia" target="_blank" rel="noopener"><div class="dot"></div><div><b>Dalboviken Media</b><span>Facebook-sida</span></div></a>
 
       <div class="section-label">Databas</div>
       <a class="chip chip-db" href="https://supabase.com/dashboard" target="_blank" rel="noopener"><div class="dot"></div><div><b>Supabase Media</b><span>prospects · customers · logs</span></div></a>
@@ -372,7 +379,8 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
       <a class="chip chip-bot" href="https://supabase.com/dashboard" target="_blank" rel="noopener"><div class="dot"></div><div><b>Edge Functions</b><span>Deno · Supabase · Swish</span></div></a>
 
       <div class="section-label">Socialt</div>
-      <a class="chip chip-social" href="https://instagram.com/ungkraft_norrbotten" target="_blank" rel="noopener"><div class="dot"></div><div><b>@ungkraft_norrbotten</b><span>Reels · Stories</span></div></a>
+      <a class="chip chip-social" href="https://instagram.com/ungkraft_norrbotten" target="_blank" rel="noopener"><div class="dot"></div><div><b>@ungkraft_norrbotten</b><span>Instagram · Reels · Stories</span></div></a>
+      <a class="chip chip-fb" href="https://facebook.com/ungkraftnorrbotten" target="_blank" rel="noopener"><div class="dot"></div><div><b>UngKraft Norrbotten</b><span>Facebook-sida</span></div></a>
 
       <div class="section-label">Databas</div>
       <a class="chip chip-db" href="https://supabase.com/dashboard" target="_blank" rel="noopener"><div class="dot"></div><div><b>Supabase UngKraft</b><span>Swish → lön → bokföring</span></div></a>
@@ -392,6 +400,9 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
       <div class="section-label">Webb</div>
       <a class="chip chip-web" href="https://www.hyrhusvagnen.se" target="_blank" rel="noopener"><div class="dot"></div><div><b>hyrhusvagnen.se</b><span>Next.js 16 · Vercel</span></div></a>
 
+      <div class="section-label">Socialt</div>
+      <a class="chip chip-fb" href="https://facebook.com/hyrhusvagnen" target="_blank" rel="noopener"><div class="dot"></div><div><b>Hyrhusvagnen</b><span>Facebook-sida</span></div></a>
+
       <div class="section-label">Bot</div>
       <a class="chip chip-bot" href="#" target="_blank" rel="noopener"><div class="dot"></div><div><b>Mailbot Hyrhusvagnen</b><span>PowerShell + MailKit</span></div></a>
 
@@ -410,6 +421,9 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
       <div class="section-label">Webb</div>
       <a class="chip chip-web" href="https://grannfix.se" target="_blank" rel="noopener"><div class="dot"></div><div><b>grannfix.se</b><span>Next.js 16 · Vercel</span></div></a>
 
+      <div class="section-label">Socialt</div>
+      <a class="chip chip-fb" href="https://facebook.com/grannfix" target="_blank" rel="noopener"><div class="dot"></div><div><b>Grannfix</b><span>Facebook-sida</span></div></a>
+
       <div class="section-label">Databas</div>
       <a class="chip chip-db" href="https://supabase.com/dashboard/project/pibgnbzgluwdskkaipui" target="_blank" rel="noopener"><div class="dot"></div><div><b>Supabase Grannfix</b><span>pibgnbzgluwdskkaipui</span></div></a>
     </div>
@@ -425,6 +439,9 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
       <div class="section-label">Webb</div>
       <a class="chip chip-web" href="https://service.dalboviken.se" target="_blank" rel="noopener"><div class="dot"></div><div><b>service.dalboviken.se</b><span>TanStack · Cloudflare Workers</span></div></a>
 
+      <div class="section-label">Socialt</div>
+      <a class="chip chip-fb" href="https://facebook.com/dalbovikenService" target="_blank" rel="noopener"><div class="dot"></div><div><b>Dalboviken Service</b><span>Facebook-sida</span></div></a>
+
       <div class="section-label">Bot</div>
       <a class="chip chip-bot" href="http://localhost:3100" target="_blank" rel="noopener"><div class="dot"></div><div><b>AI-telefonväxel</b><span>Express · 46elks · ElevenLabs · port 3100</span></div></a>
     </div>
@@ -439,6 +456,9 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
     <div class="company-body">
       <div class="section-label">Webb</div>
       <a class="chip chip-web" href="https://tomrum.dalboviken.se" target="_blank" rel="noopener"><div class="dot"></div><div><b>tomrum.dalboviken.se</b><span>Statisk Vite · Vercel</span></div></a>
+
+      <div class="section-label">Socialt</div>
+      <a class="chip chip-fb" href="https://facebook.com/dalbovikenTomrum" target="_blank" rel="noopener"><div class="dot"></div><div><b>Dalboviken Tomrum</b><span>Facebook-sida</span></div></a>
     </div>
   </div>
 
@@ -508,6 +528,15 @@ a.chip:active, a.projekt-chip:active, a.infra-chip:active {
     </a>
     <a class="infra-chip" href="https://elevenlabs.io" target="_blank" rel="noopener">
       <div><b>ElevenLabs</b><span>AI-röst · Telefonväxel</span></div>
+    </a>
+    <a class="infra-chip" href="https://search.google.com/search-console" target="_blank" rel="noopener">
+      <div><b>Google Search Console</b><span>SEO · index · prestanda</span></div>
+    </a>
+    <a class="infra-chip subtle" href="https://business.facebook.com" target="_blank" rel="noopener">
+      <div><b>Meta Business Suite</b><span>Annonsering · sidor · statistik</span></div>
+    </a>
+    <a class="infra-chip subtle" href="https://developers.facebook.com" target="_blank" rel="noopener">
+      <div><b>Meta for Developers</b><span>Graph API · webhooks · appar</span></div>
     </a>
 
   </div>
